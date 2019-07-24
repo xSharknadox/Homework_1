@@ -17,7 +17,7 @@ public class Cluster {
         System.out.println("Random failed server: " + randomServerWithFailedNode);
 
         //set servers data
-        for (int i = 0; i < randomServersSize; i++) {
+        for (int i = 1; i <= randomServersSize; i++) {
             //random size of nodes in servers
             int randomNodesSize = random.nextInt(10) + 1;
 
@@ -26,25 +26,25 @@ public class Cluster {
                 //random id of failed node and add server with data in cluster collection
                 int randomFailedNode = random.nextInt(randomNodesSize);
                 System.out.println("Random failed node in failed server: " + randomFailedNode);
-                Server server  = new Server(i);
+                Server server = new Server(i);
                 server.setRandomNodes(randomNodesSize, randomFailedNode);
                 servers.add(server);
             } else if (i > randomServerWithFailedNode) {
                 //if it's servers which located after server with failed node
-                Server server  = new Server(i);
+                Server server = new Server(i);
                 server.setRandomNodes(randomNodesSize, 0);
                 servers.add(server);
             } else {
                 //if it's servers which located before server with failed node
-                Server server  = new Server(i);
+                Server server = new Server(i);
                 server.setRandomNodes(randomNodesSize, -1);
                 servers.add(server);
             }
         }
     }
 
-    public boolean isFailed(int serverId, int nodeId){
-        return servers.get(serverId).getNodes().get(nodeId).isFailed();
+    public boolean isFailed(int server, int node) {
+        return servers.get(server).getNodes().get(node).isFailed();
     }
 
     @Override

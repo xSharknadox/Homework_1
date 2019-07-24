@@ -10,18 +10,17 @@ public class Server {
         this.id = id;
     }
 
-    public void setRandomNodes(int size, int failedNode){
-        for(int i=0; i<size; i++){
-            nodes.add(new Node(i, (failedNode!=-1 && i>=failedNode)));
+    public void setRandomNodes(int size, int failedNode) {
+        for (int i = 1; i <= size; i++) {
+            nodes.add(new Node(i, (failedNode != -1 && i >= failedNode)));
         }
     }
 
     @Override
     public String toString() {
-        return "\nServer{" +
-                "id=" + id +
-                ", nodes=" + nodes +
-                "}";
+        return "\nServer:" +
+                " id=" + id +
+                ", nodes=" + nodes;
     }
 
     public int getId() {
