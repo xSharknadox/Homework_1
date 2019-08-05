@@ -1,12 +1,16 @@
 package com.company;
 
-public class Node {
+import java.util.ArrayList;
+
+public class Node implements MessageCallback{
     private int id;
     private boolean failed = false;
+    private String message;
+    private MessageCallback serverMessageCallback;
 
-    public Node(int id, boolean failed) {
+    public Node(int id, MessageCallback serverMessageCallback) {
         this.id = id;
-        this.failed = failed;
+        this.serverMessageCallback = serverMessageCallback;
     }
 
     @Override
@@ -17,11 +21,29 @@ public class Node {
                 '}';
     }
 
+    public int getSize() {
+        return 0;
+    }
+
     public int getId() {
         return id;
     }
 
+
     public boolean isFailed() {
         return failed;
+    }
+
+    public void setMessage(Message message){
+        this.message = message.getMessage();
+    }
+
+    public String getMessage(){
+        return message;
+    }
+
+    @Override
+    public void callbackMessage(Message message) {
+        serverMessageCallback.callbackMessage(message);
     }
 }
