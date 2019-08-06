@@ -56,7 +56,7 @@ public class Cluster implements MessageSendable, Failable {
                 if (allNextFalse) {
                     break;
                 }
-            } else allNextFalse = true;
+            } else allNextFalse = false;
         }
         return allNextFalse;
     }

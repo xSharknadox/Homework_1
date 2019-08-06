@@ -60,9 +60,9 @@ public class Server implements MessageSendable, Failable {
             if (node.isPresent()) {
                 if (!allNextFalse) {
                     allNextFalse = !node.get().setMessage(message);
-                } else {
-                    allNextFalse = false;
                 }
+            } else {
+                allNextFalse = false;
             }
         }
         return !allNextFalse;
