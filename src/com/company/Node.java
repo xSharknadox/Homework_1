@@ -1,12 +1,12 @@
 package com.company;
 
-import java.util.ArrayList;
+import java.util.Random;
 
-public class Node implements MessageCallback{
+public class Node implements MessageCallback, Failable {
     private int id;
-    private boolean failed = false;
-    private String message;
+    private String message = null;
     private MessageCallback serverMessageCallback;
+    private Random random = new Random();
 
     public Node(int id, MessageCallback serverMessageCallback) {
         this.id = id;
@@ -17,33 +17,44 @@ public class Node implements MessageCallback{
     public String toString() {
         return "Node{" +
                 "id=" + id +
-                ", failed=" + failed +
+                ", message='" + message + '\'' +
                 '}';
     }
 
-    public int getSize() {
-        return 0;
+    public boolean setMessage(Message message) {
+        int randomWithSize = random.nextInt(100);
+        if (randomWithSize > 2) {
+            this.message = message.getMessage();
+        }
+        return this.message != null;
     }
 
-    public int getId() {
-        return id;
-    }
-
-
-    public boolean isFailed() {
-        return failed;
-    }
-
-    public void setMessage(Message message){
-        this.message = message.getMessage();
-    }
-
-    public String getMessage(){
+    public String getMessage() {
         return message;
     }
 
     @Override
     public void callbackMessage(Message message) {
         serverMessageCallback.callbackMessage(message);
+    }
+
+    @Override
+    public int getId() {
+        return this.id;
+    }
+
+    @Override
+    public boolean isFailed() {
+        return message == null;
+    }
+
+    @Override
+    public Failable getFailable(int index) {
+        return null;
+    }
+
+    @Override
+    public int getSize() {
+        return 0;
     }
 }
