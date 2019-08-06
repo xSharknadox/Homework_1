@@ -32,24 +32,4 @@ public class FailSearchEngine {
             System.out.println("Server id: " + cluster.getFailable(serverIndex).getId() + ", Node id: " + cluster.getFailable(serverIndex).getFailable(middle).getId());
         }
     }
-
-    private void nodeSearch(int serverIndex) {
-        int start = 0;
-        int end = cluster.getSize();
-        int middle = (start + end) / 2;
-        while (start != end) {
-            boolean result = cluster.isFailed(serverIndex, middle);
-            if (result) {
-                end = middle;
-            } else {
-                start = middle;
-            }
-            if (start == (end - 1)) {
-                middle = end;
-                break;
-            }
-            middle = (start + end) / 2;
-        }
-
-    }
 }
