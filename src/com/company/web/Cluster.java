@@ -1,10 +1,18 @@
-package com.company;
+package com.company.web;
+
+import com.company.Message;
+import com.company.exceptions.DontHaveFailableOfChildException;
+import com.company.exceptions.ElementNotFoundException;
+import com.company.interfaces.Failable;
+import com.company.interfaces.MessageCallback;
+import com.company.interfaces.MessageSendable;
 
 import java.util.ArrayList;
 
 public class Cluster implements MessageSendable, Failable {
+    private int id = 0;
     private ArrayList<Server> servers = new ArrayList<>();
-    private boolean failed;
+    private boolean failed = true;
 
     MessageCallback callback = new MessageCallback() {
 
@@ -23,10 +31,6 @@ public class Cluster implements MessageSendable, Failable {
         for (int i = 1; i <= 10; i++) {
             servers.add(new Server(i, callback));
         }
-    }
-
-    public Server getServer(int server) {
-        return servers.get(server);
     }
 
     public String toString() {
@@ -50,8 +54,13 @@ public class Cluster implements MessageSendable, Failable {
         return allNextFalse;
     }
 
-    public void sendMessage() {
-        servers.get(0).getNode(0).callbackMessage(new Message(0, 0, "message"));
+    public void sendMessage(int serverId, int nodeId) {
+        if (serverId < getSize() && serverId > 0) {
+            Server server = servers.get(serverId - 1);
+            if (nodeId < server.getSize() && nodeId > 0) {
+                servers.get(serverId - 1).getNode(nodeId - 1).callbackMessage(new Message(0, 0, "message"));
+            } else throw new ElementNotFoundException("Node with id " + nodeId);
+        } else throw new ElementNotFoundException("Server with id " + serverId);
     }
 
     public boolean isFailed(int serverNumber, int nodeNumber) {
@@ -61,7 +70,7 @@ public class Cluster implements MessageSendable, Failable {
 
     @Override
     public int getId() {
-        return 0;
+        return this.id;
     }
 
     @Override
@@ -71,7 +80,9 @@ public class Cluster implements MessageSendable, Failable {
 
     @Override
     public Failable getFailable(int index) {
-        return servers.get(index);
+        if (getSize() != 0) {
+            return servers.get(index);
+        } else throw new DontHaveFailableOfChildException();
     }
 
     @Override

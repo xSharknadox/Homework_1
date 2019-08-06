@@ -1,4 +1,4 @@
-package com.company;
+package com.company.web;
 
 public class FailSearchEngine {
     private Cluster cluster;
