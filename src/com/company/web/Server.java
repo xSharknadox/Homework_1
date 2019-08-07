@@ -65,6 +65,7 @@ public class Server implements MessageSendable, Failable {
                 allNextFalse = false;
             }
         }
+        this.failed = allNextFalse;
         return !allNextFalse;
     }
 
@@ -84,8 +85,8 @@ public class Server implements MessageSendable, Failable {
             Optional<Node> optNode = nodes.get(index);
             if (optNode.isPresent()) {
                 return optNode.get();
-            } else throw new DontHaveFailableOfChildException();
-        } else throw new DontHaveFailableOfChildException();
+            } else throw new DontHaveFailableOfChildException("Node with index " + index);
+        } else throw new DontHaveFailableOfChildException("Node with index " + index);
     }
 
     @Override

@@ -29,7 +29,7 @@ public class Node implements MessageCallback, Failable {
 
     public boolean setMessage(Message message) {
         int randomWithSize = random.nextInt(100);
-        if (randomWithSize > 2) {
+        if (randomWithSize > 5) {
             this.message = message.getMessage();
         }
         return this.message != null;
@@ -52,7 +52,7 @@ public class Node implements MessageCallback, Failable {
 
     @Override
     public Failable getFailable(int index) {
-        throw new DontHaveFailableOfChildException();
+        throw new DontHaveFailableOfChildException("Don't have childs");
     }
 
     @Override
