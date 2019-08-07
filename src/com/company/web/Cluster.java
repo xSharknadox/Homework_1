@@ -6,13 +6,17 @@ import com.company.exceptions.ElementNotFoundException;
 import com.company.interfaces.Failable;
 import com.company.interfaces.MessageCallback;
 import com.company.interfaces.MessageSendable;
+import com.company.utils.Optional;
 
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Cluster implements MessageSendable, Failable {
     private int id = 0;
-    private ArrayList<Server> servers = new ArrayList<>();
+    private ArrayList<Optional<Server>> servers = new ArrayList<>();
     private boolean failed = true;
+    private Random random = new Random();
 
     MessageCallback callback = new MessageCallback() {
 
@@ -29,42 +33,65 @@ public class Cluster implements MessageSendable, Failable {
 
     public Cluster() {
         for (int i = 1; i <= 10; i++) {
-            servers.add(new Server(i, callback));
+            if (random.nextBoolean()) {
+                servers.add(new Optional<>(new Server(i, callback)));
+            } else {
+                servers.add(new Optional<>());
+            }
         }
+        System.out.println();
     }
 
     public String toString() {
         return "Cluster{" +
-                "servers=\n" + servers +
+                "servers=\n" + servers.stream().map(Optional::get).collect(Collectors.toCollection(ArrayList::new)) +
                 '}';
     }
 
     public boolean sendMessageToChild(Message message) {
-        return servers.get(message.getServerId() - 1).sendMessageToChild(message);
+        Optional<Server> optServer = servers.get(message.getServerId() - 1);
+        if (optServer.isPresent()) {
+            return optServer.get().sendMessageToChild(message);
+        } else return false;
     }
 
     public boolean sendMessageToAll(Message message) {
         boolean allNextFalse = false;
-        for (Server server : servers) {
-            allNextFalse = !server.sendMessageToAll(message);
-            if (allNextFalse) {
-                break;
-            }
+        for (Optional<Server> server : servers) {
+            if (server.isPresent()) {
+                allNextFalse = !server.get().sendMessageToAll(message);
+                if (allNextFalse) {
+                    break;
+                }
+            } else allNextFalse = false;
         }
         return allNextFalse;
     }
 
-    public void sendMessage(int serverId, int nodeId) {
-        if (serverId < getSize() && serverId > 0) {
-            Server server = servers.get(serverId - 1);
-            if (nodeId < server.getSize() && nodeId > 0) {
-                servers.get(serverId - 1).getNode(nodeId - 1).callbackMessage(new Message(0, 0, "message"));
-            } else throw new ElementNotFoundException("Node with id " + nodeId);
-        } else throw new ElementNotFoundException("Server with id " + serverId);
+    public void sendMessage() {
+        Server server = null;
+        for (Optional<Server> optServer : servers) {
+            if (optServer.isPresent()) {
+                server = optServer.get();
+                for (int i = 0; i < server.getSize(); i++) {
+                    Node node = server.getNode(i);
+                    if (node.getId() != -1) {
+                        node.callbackMessage(new Message(0, 0, "message"));
+                        return;
+                    }
+                }
+            }
+        }
+        if (server == null) {
+            throw new ElementNotFoundException("Don't have any server and nodes");
+        }
     }
 
     public boolean isFailed(int serverNumber, int nodeNumber) {
-        return servers.get(serverNumber).getNode(nodeNumber).isFailed();
+        Optional<Server> optServer = servers.get(serverNumber);
+        if (optServer.isPresent()) {
+            return optServer.get().getNode(nodeNumber).isFailed();
+        } else return true;
     }
 
 
@@ -81,8 +108,11 @@ public class Cluster implements MessageSendable, Failable {
     @Override
     public Failable getFailable(int index) {
         if (getSize() != 0) {
-            return servers.get(index);
-        } else throw new DontHaveFailableOfChildException();
+            Optional<Server> optServer = servers.get(index);
+            if (optServer.isPresent()) {
+                return optServer.get();
+            } else throw new DontHaveFailableOfChildException("Server with index " + index);
+        } else throw new DontHaveFailableOfChildException("Server with index " + index);
     }
 
     @Override
