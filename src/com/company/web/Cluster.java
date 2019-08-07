@@ -68,17 +68,23 @@ public class Cluster implements MessageSendable, Failable {
         return allNextFalse;
     }
 
-    public void sendMessage(int serverId, int nodeId) {
-        Server server;
-        if (serverId < getSize() && serverId > 0) {
-            Optional<Server> optServer = servers.get(serverId - 1);
+    public void sendMessage() {
+        Server server = null;
+        for (Optional<Server> optServer : servers) {
             if (optServer.isPresent()) {
                 server = optServer.get();
-                if (nodeId < server.getSize() && nodeId > 0) {
-                    server.getNode(nodeId - 1).callbackMessage(new Message(0, 0, "message"));
+                for (int i = 0; i < server.getSize(); i++) {
+                    Node node = server.getNode(i);
+                    if (node.getId() != -1) {
+                        node.callbackMessage(new Message(0, 0, "message"));
+                        return;
+                    }
                 }
             }
-        } else throw new ElementNotFoundException("Collection can't exist with Server with id " + serverId);
+        }
+        if (server == null) {
+            throw new ElementNotFoundException("Don't have any server and nodes");
+        }
     }
 
     public boolean isFailed(int serverNumber, int nodeNumber) {
@@ -103,7 +109,6 @@ public class Cluster implements MessageSendable, Failable {
     public Failable getFailable(int index) {
         if (getSize() != 0) {
             Optional<Server> optServer = servers.get(index);
-            System.out.println(optServer.get());
             if (optServer.isPresent()) {
                 return optServer.get();
             } else throw new DontHaveFailableOfChildException("Server with index " + index);

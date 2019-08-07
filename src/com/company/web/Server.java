@@ -8,13 +8,15 @@ import com.company.interfaces.MessageSendable;
 import com.company.utils.Optional;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Server implements MessageSendable, Failable {
     private int id;
     private ArrayList<Optional<Node>> nodes = new ArrayList<>();
     private MessageCallback clusterMessageCallback;
-    private boolean failed = false;
+    private boolean failed = true;
+    private Random random = new Random();
     private MessageCallback callback = new MessageCallback() {
 
         @Override
@@ -27,7 +29,15 @@ public class Server implements MessageSendable, Failable {
         this.id = id;
         this.clusterMessageCallback = clusterMessageCallback;
         for (int i = 1; i <= 10; i++) {
-            nodes.add(new Optional<>(new Node(i, callback)));
+            if (random.nextBoolean()) {
+                nodes.add(new Optional<>(new Node(i, callback)));
+            } else {
+                if (i == 1) {
+                    nodes.add(new Optional<>(new Node(i, callback)));
+                } else {
+                    nodes.add(new Optional<>());
+                }
+            }
         }
     }
 
@@ -44,6 +54,7 @@ public class Server implements MessageSendable, Failable {
     public String toString() {
         return "\nServer:" +
                 " id=" + id +
+                " failed=" + failed +
                 ", nodes=" + nodes.stream().map(Optional::get).collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -57,12 +68,15 @@ public class Server implements MessageSendable, Failable {
     public boolean sendMessageToAll(Message message) {
         boolean allNextFalse = false;
         for (Optional<Node> node : nodes) {
-            if (node.isPresent()) {
-                if (!allNextFalse) {
-                    allNextFalse = !node.get().setMessage(message);
+            if (allNextFalse) break;
+            else {
+                if (node.isPresent()) {
+                    if (!allNextFalse) {
+                        allNextFalse = !node.get().setMessage(message);
+                    }
+                } else {
+                    allNextFalse = false;
                 }
-            } else {
-                allNextFalse = false;
             }
         }
         this.failed = allNextFalse;

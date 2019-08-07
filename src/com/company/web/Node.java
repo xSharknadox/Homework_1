@@ -12,7 +12,7 @@ public class Node implements MessageCallback, Failable {
     private int id;
     private String message = null;
     private MessageCallback serverMessageCallback;
-    private Random random = new Random();
+    private final Random random = new Random();
 
     public Node(int id, MessageCallback serverMessageCallback) {
         this.id = id;
@@ -29,7 +29,8 @@ public class Node implements MessageCallback, Failable {
 
     public boolean setMessage(Message message) {
         int randomWithSize = random.nextInt(100);
-        if (randomWithSize > 5) {
+        System.out.println(randomWithSize);
+        if (randomWithSize > 20) {
             this.message = message.getMessage();
         }
         return this.message != null;
