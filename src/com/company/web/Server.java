@@ -5,18 +5,14 @@ import com.company.exceptions.DontHaveFailableOfChildException;
 import com.company.interfaces.Failable;
 import com.company.interfaces.MessageCallback;
 import com.company.interfaces.MessageSendable;
-import com.company.utils.Optional;
 
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.stream.Collectors;
 
 public class Server implements MessageSendable, Failable {
     private int id;
-    private ArrayList<Optional<Node>> nodes = new ArrayList<>();
+    private ArrayList<Node> nodes = new ArrayList<>();
     private MessageCallback clusterMessageCallback;
-    private boolean failed = true;
-    private Random random = new Random();
+    private boolean failed = false;
     private MessageCallback callback = new MessageCallback() {
 
         @Override
@@ -29,57 +25,33 @@ public class Server implements MessageSendable, Failable {
         this.id = id;
         this.clusterMessageCallback = clusterMessageCallback;
         for (int i = 1; i <= 10; i++) {
-            if (random.nextBoolean()) {
-                nodes.add(new Optional<>(new Node(i, callback)));
-            } else {
-                if (i == 1) {
-                    nodes.add(new Optional<>(new Node(i, callback)));
-                } else {
-                    nodes.add(new Optional<>());
-                }
-            }
+            nodes.add(new Node(i, callback));
         }
     }
 
     public Node getNode(int node) {
-        Optional<Node> optNode = nodes.get(node);
-        if (optNode.isPresent()) {
-            return optNode.get();
-        } else {
-            return new Node(-1, null);
-        }
+        return nodes.get(node);
     }
 
     @Override
     public String toString() {
         return "\nServer:" +
                 " id=" + id +
-                " failed=" + failed +
-                ", nodes=" + nodes.stream().map(Optional::get).collect(Collectors.toCollection(ArrayList::new));
+                ", nodes=" + nodes;
     }
 
     public boolean sendMessageToChild(Message message) {
-        Optional<Node> optNode = nodes.get(message.getNodeId() - 1);
-        if (optNode.isPresent()) {
-            return nodes.get(message.getNodeId() - 1).get().setMessage(message);
-        } else return false;
+        return nodes.get(message.getNodeId() - 1).setMessage(message);
     }
 
     public boolean sendMessageToAll(Message message) {
         boolean allNextFalse = false;
-        for (Optional<Node> node : nodes) {
-            if (allNextFalse) break;
-            else {
-                if (node.isPresent()) {
-                    if (!allNextFalse) {
-                        allNextFalse = !node.get().setMessage(message);
-                    }
-                } else {
-                    allNextFalse = false;
-                }
+        for (Node node : nodes) {
+            if (!allNextFalse) {
+                allNextFalse = !node.setMessage(message);
             }
         }
-        this.failed = allNextFalse;
+
         return !allNextFalse;
     }
 
@@ -96,11 +68,8 @@ public class Server implements MessageSendable, Failable {
     @Override
     public Failable getFailable(int index) {
         if (getSize() != 0) {
-            Optional<Node> optNode = nodes.get(index);
-            if (optNode.isPresent()) {
-                return optNode.get();
-            } else throw new DontHaveFailableOfChildException("Node with index " + index);
-        } else throw new DontHaveFailableOfChildException("Node with index " + index);
+            return nodes.get(index);
+        } else throw new DontHaveFailableOfChildException();
     }
 
     @Override

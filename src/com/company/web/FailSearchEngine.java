@@ -1,7 +1,5 @@
 package com.company.web;
 
-import com.company.exceptions.DontHaveFailableOfChildException;
-
 public class FailSearchEngine {
     private Cluster cluster;
 
@@ -9,34 +7,29 @@ public class FailSearchEngine {
         this.cluster = cluster;
     }
 
-    public void search() {
-        int serverFailedIndex = -1;
-        int nodeFailedIndex = -1;
-
-        for (int i = 0; i < cluster.getSize(); i++) {
-            try {
-                if (cluster.getFailable(i).isFailed()) {
-                    serverFailedIndex = i;
-                    break;
-                }
-            } catch (DontHaveFailableOfChildException e) {
-
+    public void search(int serverIndex) {
+        int start = 0;
+        int end = serverIndex == 0 ? cluster.getSize() : cluster.getFailable(serverIndex).getSize();
+        int middle = (start + end) / 2;
+        while (start != end) {
+            boolean result = serverIndex == 0 ? cluster.isFailed(middle, cluster.getFailable(middle).getSize() - 1) : cluster.isFailed(serverIndex, middle);
+            ;
+            if (result) {
+                end = middle;
+            } else {
+                start = middle;
             }
+            if (start == (end - 1)) {
+                middle = end;
+                break;
+            }
+            middle = (start + end) / 2;
         }
-        if (serverFailedIndex == -1) {
-            System.out.println("We don't have broken node");
+        if (serverIndex == 0) {
+            search(middle);
         } else {
-            for (int i = 0; i < cluster.getFailable(serverFailedIndex).getSize(); i++) {
-                try {
-                    if (cluster.getFailable(serverFailedIndex).getFailable(i).isFailed()) {
-                        nodeFailedIndex = i;
-                        break;
-                    }
-                } catch (DontHaveFailableOfChildException e) {
-
-                }
-            }
-            System.out.println("Server id: " + cluster.getFailable(serverFailedIndex).getId() + ", Node id: " + cluster.getFailable(serverFailedIndex).getFailable(nodeFailedIndex).getId());
+            System.out.println();
+            System.out.println("Server id: " + cluster.getFailable(serverIndex).getId() + ", Node id: " + cluster.getFailable(serverIndex).getFailable(middle).getId());
         }
     }
 }
