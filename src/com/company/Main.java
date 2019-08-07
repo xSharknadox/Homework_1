@@ -11,6 +11,6 @@ public class Main {
         System.out.println(cluster);
 
         FailSearchEngine failSearchEngine = new FailSearchEngine(cluster);
-        failSearchEngine.search(0);
+        failSearchEngine.search(-1);
     }
 }
