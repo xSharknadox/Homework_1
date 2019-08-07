@@ -1,4 +1,10 @@
-package com.company;
+package com.company.web;
+
+import com.company.Message;
+import com.company.exceptions.DontHaveFailableOfChildException;
+import com.company.exceptions.SizeException;
+import com.company.interfaces.Failable;
+import com.company.interfaces.MessageCallback;
 
 import java.util.Random;
 
@@ -29,10 +35,6 @@ public class Node implements MessageCallback, Failable {
         return this.message != null;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
     @Override
     public void callbackMessage(Message message) {
         serverMessageCallback.callbackMessage(message);
@@ -50,11 +52,11 @@ public class Node implements MessageCallback, Failable {
 
     @Override
     public Failable getFailable(int index) {
-        return null;
+        throw new DontHaveFailableOfChildException();
     }
 
     @Override
     public int getSize() {
-        return 0;
+        throw new SizeException();
     }
 }
