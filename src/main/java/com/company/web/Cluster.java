@@ -7,6 +7,8 @@ import com.company.interfaces.Failable;
 import com.company.interfaces.MessageCallback;
 import com.company.interfaces.MessageSendable;
 import com.company.utils.Optional;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -14,10 +16,15 @@ import java.util.stream.Collectors;
 
 public class Cluster implements MessageSendable, Failable {
     private int id = 0;
+
+    @JsonProperty("servers")
     private ArrayList<Optional<Server>> servers = new ArrayList<>();
     private boolean failed = true;
+
+    @JsonIgnore
     private Random random = new Random();
 
+    @JsonIgnore
     MessageCallback callback = new MessageCallback() {
 
         @Override
@@ -30,9 +37,11 @@ public class Cluster implements MessageSendable, Failable {
         }
     };
 
-
     public Cluster() {
-        for (int i = 1; i <= 10; i++) {
+    }
+
+    public Cluster(int numberOfRandom) {
+        for (int i = 1; i <= numberOfRandom; i++) {
             if (random.nextBoolean()) {
                 servers.add(new Optional<>(new Server(i, callback)));
             } else {
@@ -118,5 +127,9 @@ public class Cluster implements MessageSendable, Failable {
     @Override
     public int getSize() {
         return servers.size();
+    }
+
+    public void setServers(ArrayList<Optional<Server>> servers) {
+        this.servers = servers;
     }
 }

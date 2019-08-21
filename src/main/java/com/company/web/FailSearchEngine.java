@@ -1,6 +1,9 @@
 package com.company.web;
 
 import com.company.exceptions.DontHaveFailableOfChildException;
+import com.company.utils.Result;
+
+import static com.company.utils.JsonSerialize.objectToJSON;
 
 public class FailSearchEngine {
     private Cluster cluster;
@@ -36,7 +39,9 @@ public class FailSearchEngine {
 
                 }
             }
-            System.out.println("Server id: " + cluster.getFailable(serverFailedIndex).getId() + ", Node id: " + cluster.getFailable(serverFailedIndex).getFailable(nodeFailedIndex).getId());
+            Result result = new Result(cluster.getFailable(serverFailedIndex).getId(), cluster.getFailable(serverFailedIndex).getFailable(nodeFailedIndex).getId());
+            objectToJSON(result, "C:\\Users\\Пользователь\\Documents\\result.json");
+            System.out.println(result.toString());
         }
     }
 }
