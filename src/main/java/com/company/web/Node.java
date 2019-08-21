@@ -5,13 +5,18 @@ import com.company.exceptions.DontHaveFailableOfChildException;
 import com.company.exceptions.SizeException;
 import com.company.interfaces.Failable;
 import com.company.interfaces.MessageCallback;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.Random;
 
 public class Node implements MessageCallback, Failable {
     private int id;
     private String message = null;
+
+    @JsonIgnore
     private MessageCallback serverMessageCallback;
+
+    @JsonIgnore
     private final Random random = new Random();
 
     public Node(int id, MessageCallback serverMessageCallback) {
@@ -59,6 +64,7 @@ public class Node implements MessageCallback, Failable {
     }
 
     @Override
+    @JsonIgnore
     public int getSize() {
         throw new SizeException();
     }

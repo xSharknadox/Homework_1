@@ -31,10 +31,10 @@ public class ClusterTest {
         servers.get(0).get().setNodes(nodes);
         cluster.setServers(servers);
 
-        assertThat("Cluster must have " + servers.size() + " children", servers.size(), equalTo(cluster.getSize()));
+        assertThat("Cluster must have " + servers.size() + " children", cluster.getSize(), equalTo(servers.size()));
 
         for (int i = 0; i < cluster.getSize(); i++) {
-            assertThat("Server must have " + servers.get(i).get().getSize() + " children", servers.get(i).get().getSize(), equalTo(cluster.getFailable(i).getSize()));
+            assertThat("Server must have " + servers.get(i).get().getSize() + " children", cluster.getFailable(i).getSize(), equalTo(servers.get(i).get().getSize()));
         }
 
         int nodeChildren;
@@ -46,7 +46,7 @@ public class ClusterTest {
             } catch (SizeException e) {
                 nodeChildren = 0;
             }
-            assertThat("Node can't have children", 0, equalTo(nodeChildren));
+            assertThat("Node can't have children", nodeChildren, equalTo(0));
         }
     }
 }

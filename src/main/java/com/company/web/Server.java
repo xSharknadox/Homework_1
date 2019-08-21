@@ -6,6 +6,8 @@ import com.company.interfaces.Failable;
 import com.company.interfaces.MessageCallback;
 import com.company.interfaces.MessageSendable;
 import com.company.utils.Optional;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -13,10 +15,17 @@ import java.util.stream.Collectors;
 
 public class Server implements MessageSendable, Failable {
     private int id;
+    @JsonProperty("nodes")
     private ArrayList<Optional<Node>> nodes = new ArrayList<>();
-    private MessageCallback clusterMessageCallback;
     private boolean failed = true;
+
+    @JsonIgnore
     private Random random = new Random();
+
+    @JsonIgnore
+    private MessageCallback clusterMessageCallback;
+
+    @JsonIgnore
     private MessageCallback callback = new MessageCallback() {
 
         @Override
